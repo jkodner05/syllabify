@@ -2,15 +2,15 @@ import sys
 import argparse
 
 
-DEFAULT_VOWELS = set([u'a',u'e',u'i',u'o',u'u',u'A',u'E',u'I',u'O',u'U'])
-DEFAULT_DIPHTHVOWELS = set([])
-DEFAULT_DIPHTHONGS = set([])
-DEFAULT_FSILENTS = set([])
+DEFAULT_VOWELS = {'a','e','i','o','','A','E','I','O',''}
+DEFAULT_DIPHTHVOWELS = set()
+DEFAULT_DIPHTHONGS = set()
+DEFAULT_FSILENTS = set()
 
 
 def read_vowel_file(filename):
     with open(filename,'r') as f:
-        return set([line.decode('utf8').strip() for line in f])
+        return {line.strip() for line in f}
 
 
 def find_nuclei(word, vowels=DEFAULT_VOWELS, diphthvowels=DEFAULT_DIPHTHVOWELS, diphthongs=DEFAULT_DIPHTHONGS, finalsilents=DEFAULT_FSILENTS):
@@ -43,10 +43,10 @@ def segment_cluster(cluster, onsets, codas):
         if (not coda or coda in codas) and (not onset or onset in onsets):
             return split
     #default by splitting the cluster in half
-    return len(cluster)/2
+    return int(len(cluster)/2)
 
 
-def syllabify(word, vowels=DEFAULT_VOWELS, diphthvowels=DEFAULT_DIPHTHVOWELS, diphthongs=DEFAULT_DIPHTHONGS, onsets=set([]), codas=set([]), finalsilents=set([])):
+def syllabify(word, vowels=DEFAULT_VOWELS, diphthvowels=DEFAULT_DIPHTHVOWELS, diphthongs=DEFAULT_DIPHTHONGS, onsets=set(), codas=set(), finalsilents=set()):
     syllindices = find_nuclei(word, vowels, diphthvowels, diphthongs, finalsilents)
     nucindices = [i for i,syllnum in enumerate(syllindices) if syllnum > 0]
     #degenerate case with no nuclei
@@ -75,29 +75,21 @@ def syllabify_textfile(textfile, vowels, diphthvowels, diphthongs, onsets, codas
             words = []
             for word in line.strip().split(" "):
                 if word.split():
-                    #skip words with invalid unicode
-                    try:
-                        words.append(word.decode("utf8").strip())
-                    except UnicodeDecodeError as e:
-                        print e, "\tword: ", word
+                    words.append(word.strip())
             lines.append([syllabify(word, vowels, diphthvowels, diphthongs, onsets, codas) for word in words])
         return lines
 
 
-def train_clusters(textfile, vowels, diphthvowels, diphthongs=set([])):
-    onsets = set([])
-    codas = set([])
+def train_clusters(textfile, vowels, diphthvowels, diphthongs=set()):
+    onsets = set()
+    codas = set()
     with open(textfile, 'r') as f:
         words = []
         for word in f:
             if word.split():
-                #skip words with invalid unicode
-                try:
-                    words.append(word.decode("utf8").strip())
-                except UnicodeDecodeError as e:
-                    print e, "\tword: ", word
+                words.append(word.strip())
     for word in words:
-        nucindices = find_nuclei(word,vowels,diphthvowels, finalsilents=set([]))
+        nucindices = find_nuclei(word,vowels,diphthvowels, finalsilents=set())
         #skip if cannot be syllabified
         if max(nucindices) == 0:
             continue
@@ -136,8 +128,8 @@ if __name__ == "__main__":
     vowels = DEFAULT_VOWELS
     diphthvowels = DEFAULT_DIPHTHVOWELS
     diphthongs = DEFAULT_DIPHTHONGS
-    onsets = set([])
-    codas = set([])
+    onsets = set()
+    codas = set()
     if args.vowelfile:
         vowels = read_vowel_file(args.vowelfile)
     if args.diphthongingvowelfile:
@@ -149,13 +141,13 @@ if __name__ == "__main__":
     if args.codafile:
         codas = read_vowel_file(args.codafile)
     if args.trainclusters:
-        print "Training Onsets..."
+        print("Training Onsets...")
         onsets, codas = train_clusters(args.textfile, vowels, diphthvowels, diphthongs)
-    print "\nSyllabifying..."
+    print("\nSyllabifying...")
     syllabifiedlines = syllabify_textfile(args.textfile, vowels, diphthvowels, diphthongs, onsets, codas)
 
     if args.outputfile:
         write_output(syllabifiedlines, args.outputfile, args.delim)
     else:
         for word in syllabifiedwords:
-            print " ".join(word)
+            print(" ".join(word))
