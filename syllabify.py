@@ -5,6 +5,7 @@ import argparse
 DEFAULT_VOWELS = set([u'a',u'e',u'i',u'o',u'u',u'A',u'E',u'I',u'O',u'U'])
 DEFAULT_DIPHTHVOWELS = set([])
 DEFAULT_DIPHTHONGS = set([])
+DEFAULT_FSILENTS = set([])
 
 
 def read_vowel_file(filename):
@@ -12,7 +13,7 @@ def read_vowel_file(filename):
         return set([line.decode('utf8').strip() for line in f])
 
 
-def find_nuclei(word, vowels=DEFAULT_VOWELS, diphthvowels=DEFAULT_DIPHTHVOWELS, diphthongs=DEFAULT_DIPHTHONGS):
+def find_nuclei(word, vowels=DEFAULT_VOWELS, diphthvowels=DEFAULT_DIPHTHVOWELS, diphthongs=DEFAULT_DIPHTHONGS, finalsilents=DEFAULT_FSILENTS):
     syllindices = [0]*len(word)
     #mark vowels as nuclei
     for i, char in enumerate(word):
@@ -45,8 +46,8 @@ def segment_cluster(cluster, onsets, codas):
     return len(cluster)/2
 
 
-def syllabify(word, vowels=DEFAULT_VOWELS, diphthvowels=DEFAULT_DIPHTHVOWELS, diphthongs=DEFAULT_DIPHTHONGS, onsets=set([]), codas=set([])):
-    syllindices = find_nuclei(word, vowels, diphthvowels, diphthongs)
+def syllabify(word, vowels=DEFAULT_VOWELS, diphthvowels=DEFAULT_DIPHTHVOWELS, diphthongs=DEFAULT_DIPHTHONGS, onsets=set([]), codas=set([]), finalsilents=set([])):
+    syllindices = find_nuclei(word, vowels, diphthvowels, diphthongs, finalsilents)
     nucindices = [i for i,syllnum in enumerate(syllindices) if syllnum > 0]
     #degenerate case with no nuclei
     if not nucindices:
@@ -83,7 +84,7 @@ def syllabify_textfile(textfile, vowels, diphthvowels, diphthongs, onsets, codas
         return lines
 
 
-def train_clusters(textfile, vowels, diphthvowels, diphthongs):
+def train_clusters(textfile, vowels, diphthvowels, diphthongs=set([])):
     onsets = set([])
     codas = set([])
     with open(textfile, 'r') as f:
@@ -96,11 +97,7 @@ def train_clusters(textfile, vowels, diphthvowels, diphthongs):
                 except UnicodeDecodeError as e:
                     print e, "\tword: ", word
     for word in words:
-<<<<<<< HEAD
         nucindices = find_nuclei(word,vowels,diphthvowels, finalsilents=set([]))
-=======
-        nucindices = find_nuclei(word, vowels, diphthvowels, diphthongs)
->>>>>>> jk_parkes
         #skip if cannot be syllabified
         if max(nucindices) == 0:
             continue
