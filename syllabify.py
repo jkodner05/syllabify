@@ -149,5 +149,6 @@ if __name__ == "__main__":
     if args.outputfile:
         write_output(syllabifiedlines, args.outputfile, args.delim)
     else:
-        for word in syllabifiedwords:
-            print(" ".join(word))
+        for syllabifiedwords in syllabifiedlines:
+            for word in syllabifiedwords:
+                print(" ".join(word))
