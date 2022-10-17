@@ -2,7 +2,7 @@ import sys
 import argparse
 
 
-DEFAULT_VOWELS = {'a','e','i','o','','A','E','I','O',''}
+DEFAULT_VOWELS = {'a','e','i','o','u','A','E','I','O','U'}
 DEFAULT_DIPHTHVOWELS = set()
 DEFAULT_DIPHTHONGS = set()
 DEFAULT_FSILENTS = set()
