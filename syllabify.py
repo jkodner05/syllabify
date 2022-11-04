@@ -104,7 +104,7 @@ def write_output(syllabifiedlines, outputfile, delim):
         for line in syllabifiedlines:
             words = []
             for word in line:
-                words.append(delim.join(word).encode("utf8"))
+                words.append(delim.join(word)) 
             f.write(" ".join(words))
             if words:
                 f.write("\n")
